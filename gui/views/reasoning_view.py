@@ -1,12 +1,31 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QHeaderView, QTableWidget, QTableWidgetItem, QPushButton, QLabel, QLineEdit, QTextEdit, QTabWidget
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QHeaderView, QTableWidget, QTableWidgetItem, QPushButton, QLabel, QLineEdit, QTextEdit, QTabWidget, QSplitter
+from PySide6.QtCore import Qt
+from datetime import datetime
+import sys
+from pathlib import Path
 
 from clifford.reason import ReasoningEngine, ReasoningStep, Decision, Plan
+
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "LLM"))
+from avon import Avon, AvonConfig, AvonGenerator, Tokenizer
 
 
 class ReasoningView(QWidget):
     def __init__(self):
         super().__init__()
         self.reasoning_engine = ReasoningEngine()
+        
+        try:
+            self.avon_config = AvonConfig(vocab_size=10000, d_model=256, n_heads=4, n_layers=4, d_ff=1024)
+            self.avon = Avon(self.avon_config)
+            self.tokenizer = Tokenizer(vocab_size=10000)
+            self.avon_generator = AvonGenerator(self.avon, self.tokenizer)
+            self.avon_available = True
+        except Exception as e:
+            self.avon_available = False
+            print(f"Avon initialization failed: {e}")
+        
+        self.chat_history: List[Dict[str, str]] = []
         self.init_ui()
 
     def init_ui(self):
@@ -22,6 +41,7 @@ class ReasoningView(QWidget):
         tabs = QTabWidget()
         tabs.setDocumentMode(True)
         
+        tabs.addTab(self._create_chat_tab(), "Chat")
         tabs.addTab(self._create_reasoning_tab(), "Reason")
         tabs.addTab(self._create_decisions_tab(), "Decisions")
         tabs.addTab(self._create_plans_tab(), "Plans")
@@ -31,6 +51,60 @@ class ReasoningView(QWidget):
         layout.addWidget(subtitle)
         layout.addWidget(tabs)
         self.setLayout(layout)
+
+    def _create_chat_tab(self):
+        widget = QWidget()
+        layout = QVBoxLayout()
+        
+        splitter = QSplitter(Qt.Vertical)
+        
+        self.chat_display = QTextEdit()
+        self.chat_display.setReadOnly(True)
+        self.chat_display.setStyleSheet("""
+            QTextEdit {
+                background-color: #0a0a0a;
+                color: #c0c0c0;
+                border: 1px solid #222222;
+                border-radius: 2px;
+                padding: 12px;
+            }
+        """)
+        splitter.addWidget(self.chat_display)
+        
+        input_widget = QWidget()
+        input_layout = QHBoxLayout()
+        input_layout.setContentsMargins(0, 0, 0, 0)
+        
+        self.chat_input = QLineEdit()
+        self.chat_input.setPlaceholderText("Type your message...")
+        self.chat_input.setStyleSheet("""
+            QLineEdit {
+                background-color: #0a0a0a;
+                color: #c0c0c0;
+                border: 1px solid #333333;
+                border-radius: 2px;
+                padding: 8px 12px;
+            }
+            QLineEdit:focus {
+                border: 1px solid #555555;
+            }
+        """)
+        self.chat_input.returnPressed.connect(self._send_chat_message)
+        input_layout.addWidget(self.chat_input)
+        
+        send_button = QPushButton("Send")
+        send_button.clicked.connect(self._send_chat_message)
+        input_layout.addWidget(send_button)
+        
+        input_widget.setLayout(input_layout)
+        splitter.addWidget(input_widget)
+        
+        splitter.setStretchFactor(0, 1)
+        splitter.setStretchFactor(1, 0)
+        
+        layout.addWidget(splitter)
+        widget.setLayout(layout)
+        return widget
 
     def _create_reasoning_tab(self):
         widget = QWidget()
@@ -126,42 +200,108 @@ class ReasoningView(QWidget):
     def _stretch_table(self, table):
         table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
+    def _send_chat_message(self):
+        message = self.chat_input.text()
+        if not message:
+            return
+        
+        self.chat_input.clear()
+        
+        self._add_chat_message("user", message)
+        
+        try:
+            if self.avon_available and self.tokenizer.vocab_built:
+                response = self.avon_generator.generate_text(
+                    message,
+                    max_length=50,
+                    temperature=0.8
+                )
+            else:
+                response = self._fallback_response(message)
+            
+            self._add_chat_message("ai", response)
+            
+        except Exception as e:
+            self._add_chat_message("ai", f"I encountered an error: {str(e)}")
+
+    def _fallback_response(self, message: str) -> str:
+        reasoning_steps = self.reasoning_engine.reason(message)
+        if reasoning_steps and len(reasoning_steps) > 0:
+            main_thought = reasoning_steps[0].thought
+            return f"{main_thought}"
+        return "I'm processing your request, but my language model is not yet trained. Please train the Avon model first."
+
+    def _add_chat_message(self, sender: str, message: str):
+        self.chat_history.append({
+            "sender": sender,
+            "message": message,
+            "timestamp": datetime.now().isoformat()
+        })
+        
+        if sender == "user":
+            formatted_message = f"<b>You:</b> {message}"
+        else:
+            formatted_message = f"<b>AI:</b> {message}"
+        
+        self.chat_display.append(formatted_message)
+        self.chat_display.verticalScrollBar().setValue(
+            self.chat_display.verticalScrollBar().maximum()
+        )
+
     def _reason(self):
         query = self.query_input.text()
         if query:
-            steps = self.reasoning_engine.reason(query)
-            output = ""
-            for i, step in enumerate(steps, 1):
-                output += f"Step {i}: {step.thought}\n"
-                output += f"  Confidence: {step.confidence:.2f}\n"
-                output += f"  Evidence: {', '.join(step.evidence)}\n\n"
-            self.reasoning_output.setText(output)
+            try:
+                steps = self.reasoning_engine.reason(query)
+                if not steps:
+                    self.reasoning_output.setText("No reasoning steps generated.")
+                    return
+                output = ""
+                for i, step in enumerate(steps, 1):
+                    output += f"Step {i}: {step.thought}\n"
+                    output += f"  Confidence: {step.confidence:.2f}\n"
+                    output += f"  Evidence: {', '.join(step.evidence)}\n\n"
+                self.reasoning_output.setText(output)
+            except Exception as e:
+                self.reasoning_output.setText(f"Error: {str(e)}")
 
     def _make_decision(self):
         action = self.action_input.text()
         if action:
-            reasoning_steps = self.reasoning_engine.reason(action)
-            decision = self.reasoning_engine.make_decision(action, reasoning_steps)
-            self._refresh_decisions()
-            self.action_input.clear()
+            try:
+                reasoning_steps = self.reasoning_engine.reason(action)
+                decision = self.reasoning_engine.make_decision(action, reasoning_steps)
+                self._refresh_decisions()
+                self.action_input.clear()
+            except Exception as e:
+                self.reasoning_output.setText(f"Error: {str(e)}")
 
     def _create_plan(self):
         goal = self.goal_input.text()
         steps_str = self.steps_input.text()
         if goal and steps_str:
-            steps = [s.strip() for s in steps_str.split(",")]
-            plan = self.reasoning_engine.create_plan(goal, steps)
-            self._update_plan_display()
-            self.goal_input.clear()
-            self.steps_input.clear()
+            try:
+                steps = [s.strip() for s in steps_str.split(",")]
+                if not steps:
+                    self.plan_output.setText("Error: No steps provided.")
+                    return
+                plan = self.reasoning_engine.create_plan(goal, steps)
+                self._update_plan_display()
+                self.goal_input.clear()
+                self.steps_input.clear()
+            except Exception as e:
+                self.plan_output.setText(f"Error: {str(e)}")
 
     def _execute_plan_step(self):
-        step = self.reasoning_engine.execute_plan_step()
-        if step:
-            self._update_plan_display()
-        else:
-            self.reasoning_engine.complete_plan()
-            self.plan_output.setText("Plan completed!")
+        try:
+            step = self.reasoning_engine.execute_plan_step()
+            if step:
+                self._update_plan_display()
+            else:
+                self.reasoning_engine.complete_plan()
+                self.plan_output.setText("Plan completed!")
+        except Exception as e:
+            self.plan_output.setText(f"Error: {str(e)}")
 
     def _update_plan_display(self):
         if self.reasoning_engine.current_plan:

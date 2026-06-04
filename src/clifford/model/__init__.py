@@ -12,6 +12,7 @@ from clifford.model.validate import ModelValidator
 from clifford.model.profile import ModelProfiler
 from clifford.model.compress import ModelCompressor
 from clifford.model.quantize import ModelQuantizer
+from clifford.model.sentience import EmergentPersonality, SelfModel, EmergentConsciousness, ConsciousnessManager
 
 __all__ = [
     "Network",
@@ -42,4 +43,8 @@ __all__ = [
     "ModelProfiler",
     "ModelCompressor",
     "ModelQuantizer",
+    "EmergentPersonality",
+    "SelfModel",
+    "EmergentConsciousness",
+    "ConsciousnessManager",
 ]

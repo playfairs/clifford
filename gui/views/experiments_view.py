@@ -94,37 +94,49 @@ class ExperimentsView(QWidget):
         name = self.experiment_name.text()
         description = self.experiment_desc.text()
         if name:
-            self.registry.create_experiment(name, description)
-            self.experiment_name.clear()
-            self.experiment_desc.clear()
-            self._refresh_experiments()
+            try:
+                self.registry.create_experiment(name, description)
+                self.experiment_name.clear()
+                self.experiment_desc.clear()
+                self._refresh_experiments()
+            except Exception as e:
+                pass
 
     def _create_run(self):
         experiment_id = self.run_experiment_id.text()
         if experiment_id:
-            self.registry.create_experiment_run(experiment_id)
-            self.run_experiment_id.clear()
-            self._refresh_runs()
+            try:
+                self.registry.create_experiment_run(experiment_id)
+                self.run_experiment_id.clear()
+                self._refresh_runs()
+            except Exception as e:
+                pass
 
     def _refresh_experiments(self):
-        experiments = self.registry.list_experiments()
-        self.experiments_table.setRowCount(len(experiments))
-        for i, exp in enumerate(experiments):
-            self.experiments_table.setItem(i, 0, QTableWidgetItem(exp["id"][:8]))
-            self.experiments_table.setItem(i, 1, QTableWidgetItem(exp["name"]))
-            self.experiments_table.setItem(i, 2, QTableWidgetItem(exp.get("description", "")))
-            self.experiments_table.setItem(i, 3, QTableWidgetItem(", ".join(exp["tags"])))
+        try:
+            experiments = self.registry.list_experiments()
+            self.experiments_table.setRowCount(len(experiments))
+            for i, exp in enumerate(experiments):
+                self.experiments_table.setItem(i, 0, QTableWidgetItem(exp["id"][:8]))
+                self.experiments_table.setItem(i, 1, QTableWidgetItem(exp["name"]))
+                self.experiments_table.setItem(i, 2, QTableWidgetItem(exp.get("description", "")))
+                self.experiments_table.setItem(i, 3, QTableWidgetItem(", ".join(exp["tags"])))
+        except Exception as e:
+            pass
 
     def _refresh_runs(self):
-        with sqlite3.connect(self.registry.db_path) as conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT id, experiment_id, model_id, status, start_time FROM experiment_runs")
-            rows = cursor.fetchall()
-            
-        self.runs_table.setRowCount(len(rows))
-        for i, row in enumerate(rows):
-            self.runs_table.setItem(i, 0, QTableWidgetItem(row[0][:8]))
-            self.runs_table.setItem(i, 1, QTableWidgetItem(row[1][:8]))
-            self.runs_table.setItem(i, 2, QTableWidgetItem(row[2][:8] if row[2] else ""))
-            self.runs_table.setItem(i, 3, QTableWidgetItem(row[3]))
-            self.runs_table.setItem(i, 4, QTableWidgetItem(row[4]))
+        try:
+            with sqlite3.connect(self.registry.db_path) as conn:
+                cursor = conn.cursor()
+                cursor.execute("SELECT id, experiment_id, model_id, status, start_time FROM experiment_runs")
+                rows = cursor.fetchall()
+                
+            self.runs_table.setRowCount(len(rows))
+            for i, row in enumerate(rows):
+                self.runs_table.setItem(i, 0, QTableWidgetItem(row[0][:8]))
+                self.runs_table.setItem(i, 1, QTableWidgetItem(row[1][:8]))
+                self.runs_table.setItem(i, 2, QTableWidgetItem(row[2][:8] if row[2] else ""))
+                self.runs_table.setItem(i, 3, QTableWidgetItem(row[3]))
+                self.runs_table.setItem(i, 4, QTableWidgetItem(row[4]))
+        except Exception as e:
+            pass

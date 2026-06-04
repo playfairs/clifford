@@ -229,3 +229,5 @@ test*
 examples
 # database
 *.db
+consciousness*
+reasoning

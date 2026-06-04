@@ -155,40 +155,55 @@ class GraphView(QWidget):
         name = self.entity_name.text()
         entity_type = self.entity_type.text()
         if name and entity_type:
-            self.knowledge_graph.add_entity(name, entity_type)
-            self.entity_name.clear()
-            self.entity_type.clear()
-            self._refresh_entities()
+            try:
+                self.knowledge_graph.add_entity(name, entity_type)
+                self.entity_name.clear()
+                self.entity_type.clear()
+                self._refresh_entities()
+            except Exception as e:
+                pass
 
     def _add_relationship(self):
         source = self.rel_source.text()
         target = self.rel_target.text()
         rel_type = self.rel_type.text()
         if source and target and rel_type:
-            self.knowledge_graph.add_relationship(source, target, rel_type)
-            self.rel_source.clear()
-            self.rel_target.clear()
-            self.rel_type.clear()
-            self._refresh_relationships()
+            try:
+                self.knowledge_graph.add_relationship(source, target, rel_type)
+                self.rel_source.clear()
+                self.rel_target.clear()
+                self.rel_type.clear()
+                self._refresh_relationships()
+            except Exception as e:
+                pass
 
     def _add_fact(self):
         statement = self.fact_statement.text()
         if statement:
-            self.knowledge_graph.add_fact(statement, [])
-            self.fact_statement.clear()
-            self._refresh_facts()
+            try:
+                self.knowledge_graph.add_fact(statement, [])
+                self.fact_statement.clear()
+                self._refresh_facts()
+            except Exception as e:
+                pass
 
     def _search_entities(self):
         query = self.search_input.text()
         if query:
-            results = self.knowledge_graph.search_entities(query)
-            self._refresh_search_results(results, "entity")
+            try:
+                results = self.knowledge_graph.search_entities(query)
+                self._refresh_search_results(results, "entity")
+            except Exception as e:
+                pass
 
     def _search_facts(self):
         query = self.search_input.text()
         if query:
-            results = self.knowledge_graph.search_facts(query)
-            self._refresh_search_results(results, "fact")
+            try:
+                results = self.knowledge_graph.search_facts(query)
+                self._refresh_search_results(results, "fact")
+            except Exception as e:
+                pass
 
     def _refresh_entities(self):
         entities = list(self.knowledge_graph.entities.values())

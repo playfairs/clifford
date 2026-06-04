@@ -201,50 +201,71 @@ class MemoryView(QWidget):
     def _add_working_memory(self):
         content = self.working_input.text()
         if content:
-            self.working_memory.add(content)
-            self.working_input.clear()
-            self._refresh_working_memory()
+            try:
+                self.working_memory.add(content)
+                self.working_input.clear()
+                self._refresh_working_memory()
+            except Exception as e:
+                pass
 
     def _add_short_term_memory(self):
         content = self.short_term_input.text()
         if content:
-            self.short_term_memory.add(content)
-            self.short_term_input.clear()
-            self._refresh_short_term_memory()
+            try:
+                self.short_term_memory.add(content)
+                self.short_term_input.clear()
+                self._refresh_short_term_memory()
+            except Exception as e:
+                pass
 
     def _add_long_term_memory(self):
         content = self.long_term_input.text()
         if content:
-            self.long_term_memory.add(content)
-            self.long_term_input.clear()
-            self._refresh_long_term_memory()
+            try:
+                self.long_term_memory.add(content)
+                self.long_term_input.clear()
+                self._refresh_long_term_memory()
+            except Exception as e:
+                pass
 
     def _add_episodic_memory(self):
         episode = self.episodic_input.text()
         if episode:
-            self.episodic_memory.add_episode(episode)
-            self.episodic_input.clear()
-            self._refresh_episodic_memory()
+            try:
+                self.episodic_memory.add_episode(episode)
+                self.episodic_input.clear()
+                self._refresh_episodic_memory()
+            except Exception as e:
+                pass
 
     def _add_semantic_memory(self):
         concept = self.semantic_input.text()
         if concept:
-            self.semantic_memory.add_concept(concept)
-            self.semantic_input.clear()
-            self._refresh_semantic_memory()
+            try:
+                self.semantic_memory.add_concept(concept)
+                self.semantic_input.clear()
+                self._refresh_semantic_memory()
+            except Exception as e:
+                pass
 
     def _add_persistent_memory(self):
         content = self.persistent_input.text()
         if content:
-            self.persistent_memory.add(content)
-            self.persistent_input.clear()
-            self._refresh_persistent_memory()
+            try:
+                self.persistent_memory.add(content)
+                self.persistent_input.clear()
+                self._refresh_persistent_memory()
+            except Exception as e:
+                pass
 
     def _search_memory(self):
         query = self.search_input.text()
         if query:
-            results = self.searchable_memory.search(query)
-            self._refresh_search_results(results)
+            try:
+                results = self.searchable_memory.search(query)
+                self._refresh_search_results(results)
+            except Exception as e:
+                pass
 
     def _refresh_working_memory(self):
         items = self.working_memory.get_all()
