@@ -1,5 +1,4 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QTableWidget, QTableWidgetItem, QPushButton, QLabel, QLineEdit, QTextEdit, QComboBox, QTabWidget
-from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QHeaderView, QTableWidget, QTableWidgetItem, QPushButton, QLabel, QLineEdit, QTextEdit, QTabWidget
 
 from clifford.reason import ReasoningEngine, ReasoningStep, Decision, Plan
 
@@ -12,14 +11,24 @@ class ReasoningView(QWidget):
 
     def init_ui(self):
         layout = QVBoxLayout()
-        
+        layout.setContentsMargins(24, 24, 24, 24)
+        layout.setSpacing(16)
+
+        title = QLabel("Reasoning")
+        title.setObjectName("PageTitle")
+        subtitle = QLabel("Reasoning traces, decisions, plans, and history.")
+        subtitle.setObjectName("MutedLabel")
+
         tabs = QTabWidget()
+        tabs.setDocumentMode(True)
         
         tabs.addTab(self._create_reasoning_tab(), "Reason")
         tabs.addTab(self._create_decisions_tab(), "Decisions")
         tabs.addTab(self._create_plans_tab(), "Plans")
         tabs.addTab(self._create_history_tab(), "History")
         
+        layout.addWidget(title)
+        layout.addWidget(subtitle)
         layout.addWidget(tabs)
         self.setLayout(layout)
 
@@ -60,6 +69,7 @@ class ReasoningView(QWidget):
         self.decisions_table = QTableWidget()
         self.decisions_table.setColumnCount(4)
         self.decisions_table.setHorizontalHeaderLabels(["ID", "Action", "Confidence", "Timestamp"])
+        self._stretch_table(self.decisions_table)
         layout.addWidget(self.decisions_table)
         
         widget.setLayout(layout)
@@ -103,6 +113,7 @@ class ReasoningView(QWidget):
         self.history_table = QTableWidget()
         self.history_table.setColumnCount(4)
         self.history_table.setHorizontalHeaderLabels(["ID", "Action", "Confidence", "Timestamp"])
+        self._stretch_table(self.history_table)
         layout.addWidget(self.history_table)
         
         refresh_button = QPushButton("Refresh History")
@@ -111,6 +122,9 @@ class ReasoningView(QWidget):
         
         widget.setLayout(layout)
         return widget
+
+    def _stretch_table(self, table):
+        table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
     def _reason(self):
         query = self.query_input.text()

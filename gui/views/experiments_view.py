@@ -1,6 +1,6 @@
 import sqlite3
 
-from PySide6.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QPushButton, QTabWidget, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QHBoxLayout, QHeaderView, QLabel, QLineEdit, QPushButton, QTabWidget, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget
 
 from clifford.database import Registry
 
@@ -22,6 +22,7 @@ class ExperimentsView(QWidget):
         subtitle.setObjectName("MutedLabel")
         
         tabs = QTabWidget()
+        tabs.setDocumentMode(True)
         
         tabs.addTab(self._create_experiments_tab(), "Experiments")
         tabs.addTab(self._create_runs_tab(), "Runs")
@@ -50,6 +51,7 @@ class ExperimentsView(QWidget):
         self.experiments_table = QTableWidget()
         self.experiments_table.setColumnCount(4)
         self.experiments_table.setHorizontalHeaderLabels(["ID", "Name", "Description", "Tags"])
+        self._stretch_table(self.experiments_table)
         layout.addWidget(self.experiments_table)
         
         refresh_button = QPushButton("Refresh")
@@ -75,6 +77,7 @@ class ExperimentsView(QWidget):
         self.runs_table = QTableWidget()
         self.runs_table.setColumnCount(5)
         self.runs_table.setHorizontalHeaderLabels(["ID", "Experiment ID", "Model ID", "Status", "Start Time"])
+        self._stretch_table(self.runs_table)
         layout.addWidget(self.runs_table)
         
         refresh_button = QPushButton("Refresh")
@@ -83,6 +86,9 @@ class ExperimentsView(QWidget):
         
         widget.setLayout(layout)
         return widget
+
+    def _stretch_table(self, table):
+        table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
     def _create_experiment(self):
         name = self.experiment_name.text()

@@ -1,5 +1,4 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QTableWidget, QTableWidgetItem, QPushButton, QLabel, QLineEdit, QTextEdit, QComboBox, QTabWidget
-from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QHeaderView, QTableWidget, QTableWidgetItem, QPushButton, QLabel, QLineEdit, QTextEdit, QTabWidget
 
 from clifford.graph import KnowledgeGraph, Entity, Relationship, Fact
 
@@ -12,8 +11,16 @@ class GraphView(QWidget):
 
     def init_ui(self):
         layout = QVBoxLayout()
-        
+        layout.setContentsMargins(24, 24, 24, 24)
+        layout.setSpacing(16)
+
+        title = QLabel("Knowledge Graph")
+        title.setObjectName("PageTitle")
+        subtitle = QLabel("Entities, relationships, facts, search, and graph statistics.")
+        subtitle.setObjectName("MutedLabel")
+
         tabs = QTabWidget()
+        tabs.setDocumentMode(True)
         
         tabs.addTab(self._create_entities_tab(), "Entities")
         tabs.addTab(self._create_relationships_tab(), "Relationships")
@@ -21,6 +28,8 @@ class GraphView(QWidget):
         tabs.addTab(self._create_search_tab(), "Search")
         tabs.addTab(self._create_stats_tab(), "Stats")
         
+        layout.addWidget(title)
+        layout.addWidget(subtitle)
         layout.addWidget(tabs)
         self.setLayout(layout)
 
@@ -43,6 +52,7 @@ class GraphView(QWidget):
         self.entities_table = QTableWidget()
         self.entities_table.setColumnCount(4)
         self.entities_table.setHorizontalHeaderLabels(["ID", "Name", "Type", "Confidence"])
+        self._stretch_table(self.entities_table)
         layout.addWidget(self.entities_table)
         
         widget.setLayout(layout)
@@ -70,6 +80,7 @@ class GraphView(QWidget):
         self.relationships_table = QTableWidget()
         self.relationships_table.setColumnCount(4)
         self.relationships_table.setHorizontalHeaderLabels(["ID", "Source", "Target", "Type"])
+        self._stretch_table(self.relationships_table)
         layout.addWidget(self.relationships_table)
         
         widget.setLayout(layout)
@@ -91,6 +102,7 @@ class GraphView(QWidget):
         self.facts_table = QTableWidget()
         self.facts_table.setColumnCount(4)
         self.facts_table.setHorizontalHeaderLabels(["ID", "Statement", "Confidence", "Timestamp"])
+        self._stretch_table(self.facts_table)
         layout.addWidget(self.facts_table)
         
         widget.setLayout(layout)
@@ -115,10 +127,14 @@ class GraphView(QWidget):
         self.search_table = QTableWidget()
         self.search_table.setColumnCount(3)
         self.search_table.setHorizontalHeaderLabels(["ID", "Content", "Confidence"])
+        self._stretch_table(self.search_table)
         layout.addWidget(self.search_table)
         
         widget.setLayout(layout)
         return widget
+
+    def _stretch_table(self, table):
+        table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
     def _create_stats_tab(self):
         widget = QWidget()

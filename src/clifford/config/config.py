@@ -4,6 +4,7 @@ from typing import Optional, Dict, Any
 from dataclasses import dataclass, field
 
 from clifford.core.exceptions import ConfigurationError
+from clifford.utils import get_project_root
 
 
 @dataclass
@@ -51,7 +52,7 @@ class Config:
 class ConfigManager:
     def __init__(self, config_path: Optional[Path] = None):
         if config_path is None:
-            config_path = Path(__file__).parent.parent.parent / "clifford.toml"
+            config_path = get_project_root() / "clifford.toml"
         self.config_path = Path(config_path)
         self.config = Config()
 

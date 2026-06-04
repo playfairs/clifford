@@ -1,5 +1,4 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QTableWidget, QTableWidgetItem, QPushButton, QLabel, QLineEdit, QTextEdit, QComboBox, QTabWidget
-from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QHeaderView, QTableWidget, QTableWidgetItem, QPushButton, QLabel, QLineEdit, QTabWidget
 
 from clifford.memory import WorkingMemory, ShortTermMemory, LongTermMemory, EpisodicMemoryStore, SemanticMemoryStore, PersistentMemory, SearchableMemory, MemoryRanker, MemorySummarizer, MemoryClusterer
 
@@ -18,8 +17,16 @@ class MemoryView(QWidget):
 
     def init_ui(self):
         layout = QVBoxLayout()
-        
+        layout.setContentsMargins(24, 24, 24, 24)
+        layout.setSpacing(16)
+
+        title = QLabel("Memory")
+        title.setObjectName("PageTitle")
+        subtitle = QLabel("Working, short-term, long-term, and searchable memory stores.")
+        subtitle.setObjectName("MutedLabel")
+
         tabs = QTabWidget()
+        tabs.setDocumentMode(True)
         
         tabs.addTab(self._create_working_memory_tab(), "Working")
         tabs.addTab(self._create_short_term_memory_tab(), "Short-term")
@@ -29,6 +36,8 @@ class MemoryView(QWidget):
         tabs.addTab(self._create_persistent_memory_tab(), "Persistent")
         tabs.addTab(self._create_searchable_memory_tab(), "Searchable")
         
+        layout.addWidget(title)
+        layout.addWidget(subtitle)
         layout.addWidget(tabs)
         self.setLayout(layout)
 
@@ -48,6 +57,7 @@ class MemoryView(QWidget):
         self.working_table = QTableWidget()
         self.working_table.setColumnCount(3)
         self.working_table.setHorizontalHeaderLabels(["ID", "Content", "Importance"])
+        self._stretch_table(self.working_table)
         layout.addWidget(self.working_table)
         
         widget.setLayout(layout)
@@ -69,6 +79,7 @@ class MemoryView(QWidget):
         self.short_term_table = QTableWidget()
         self.short_term_table.setColumnCount(3)
         self.short_term_table.setHorizontalHeaderLabels(["ID", "Content", "Timestamp"])
+        self._stretch_table(self.short_term_table)
         layout.addWidget(self.short_term_table)
         
         widget.setLayout(layout)
@@ -90,6 +101,7 @@ class MemoryView(QWidget):
         self.long_term_table = QTableWidget()
         self.long_term_table.setColumnCount(4)
         self.long_term_table.setHorizontalHeaderLabels(["ID", "Content", "Importance", "Tags"])
+        self._stretch_table(self.long_term_table)
         layout.addWidget(self.long_term_table)
         
         widget.setLayout(layout)
@@ -111,6 +123,7 @@ class MemoryView(QWidget):
         self.episodic_table = QTableWidget()
         self.episodic_table.setColumnCount(3)
         self.episodic_table.setHorizontalHeaderLabels(["ID", "Episode", "Importance"])
+        self._stretch_table(self.episodic_table)
         layout.addWidget(self.episodic_table)
         
         widget.setLayout(layout)
@@ -132,6 +145,7 @@ class MemoryView(QWidget):
         self.semantic_table = QTableWidget()
         self.semantic_table.setColumnCount(3)
         self.semantic_table.setHorizontalHeaderLabels(["ID", "Concept", "Confidence"])
+        self._stretch_table(self.semantic_table)
         layout.addWidget(self.semantic_table)
         
         widget.setLayout(layout)
@@ -153,6 +167,7 @@ class MemoryView(QWidget):
         self.persistent_table = QTableWidget()
         self.persistent_table.setColumnCount(3)
         self.persistent_table.setHorizontalHeaderLabels(["ID", "Content", "Timestamp"])
+        self._stretch_table(self.persistent_table)
         layout.addWidget(self.persistent_table)
         
         widget.setLayout(layout)
@@ -174,10 +189,14 @@ class MemoryView(QWidget):
         self.search_table = QTableWidget()
         self.search_table.setColumnCount(3)
         self.search_table.setHorizontalHeaderLabels(["Content", "Score", "Tags"])
+        self._stretch_table(self.search_table)
         layout.addWidget(self.search_table)
         
         widget.setLayout(layout)
         return widget
+
+    def _stretch_table(self, table):
+        table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
     def _add_working_memory(self):
         content = self.working_input.text()
