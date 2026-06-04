@@ -6,22 +6,57 @@ import numpy as np
 from numpy.typing import NDArray
 
 
+def get_project_root() -> Path:
+    env_path = os.environ.get("CLIFFORD_PROJECT_ROOT")
+    if env_path:
+        return Path(env_path).expanduser().resolve()
+
+    current = Path(__file__).resolve()
+    for parent in current.parents:
+        if (parent / "pyproject.toml").exists():
+            return parent
+
+    return current.parents[3]
+
+
 def get_asset_path() -> Path:
     env_path = os.environ.get("CLIFFORD_ASSET_PATH")
     if env_path:
-        return Path(env_path)
-    return Path(__file__).parent.parent.parent / "assets" / "clifford.png"
+        return Path(env_path).expanduser()
+    return get_project_root() / "assets" / "clifford.png"
 
 
 def get_db_path() -> Path:
     env_path = os.environ.get("CLIFFORD_DB_PATH")
     if env_path:
-        return Path(env_path)
-    return Path(__file__).parent.parent.parent.parent / "database" / "clifford.db"
+        return Path(env_path).expanduser()
+    return get_project_root() / "database" / "clifford.db"
+
+
+def get_legacy_db_paths() -> List[Path]:
+    root = get_project_root()
+    return [
+        root / "src" / "database" / "clifford.db",
+    ]
+
+
+def get_models_dir() -> Path:
+    env_path = os.environ.get("CLIFFORD_MODELS_DIR")
+    if env_path:
+        return Path(env_path).expanduser()
+    return get_project_root() / "models"
+
+
+def get_legacy_model_dirs() -> List[Path]:
+    root = get_project_root()
+    return [
+        root / "src" / "models",
+    ]
 
 
 def ensure_directory(path: Path) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
+    target = path if not path.suffix else path.parent
+    target.mkdir(parents=True, exist_ok=True)
 
 
 def serialize_ndarray(arr: NDArray[np.float64]) -> Dict[str, Any]:

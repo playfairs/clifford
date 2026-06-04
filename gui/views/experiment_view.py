@@ -1,5 +1,4 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QTableWidget, QTableWidgetItem, QPushButton, QLabel, QLineEdit, QTextEdit
-from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QHBoxLayout, QHeaderView, QLabel, QLineEdit, QPushButton, QTableWidget, QTableWidgetItem, QTextEdit, QVBoxLayout, QWidget
 
 from clifford.database import Registry
 from clifford.search import Search
@@ -14,6 +13,13 @@ class ExperimentViewer(QWidget):
 
     def init_ui(self):
         layout = QVBoxLayout()
+        layout.setContentsMargins(24, 24, 24, 24)
+        layout.setSpacing(16)
+
+        title = QLabel("Training Runs")
+        title.setObjectName("PageTitle")
+        subtitle = QLabel("Run history, status, final losses, and saved training config.")
+        subtitle.setObjectName("MutedLabel")
         
         search_layout = QHBoxLayout()
         self.search_input = QLineEdit()
@@ -23,7 +29,6 @@ class ExperimentViewer(QWidget):
         self.refresh_button = QPushButton("Refresh")
         self.refresh_button.clicked.connect(self.refresh_runs)
         
-        search_layout.addWidget(QLabel("Search:"))
         search_layout.addWidget(self.search_input)
         search_layout.addWidget(self.search_button)
         search_layout.addWidget(self.refresh_button)
@@ -31,7 +36,7 @@ class ExperimentViewer(QWidget):
         self.run_table = QTableWidget()
         self.run_table.setColumnCount(5)
         self.run_table.setHorizontalHeaderLabels(["Run ID", "Model ID", "Status", "Final Loss", "Start Time"])
-        self.run_table.horizontalHeader().setStretchLastSection(True)
+        self.run_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.run_table.setSelectionBehavior(QTableWidget.SelectRows)
         self.run_table.clicked.connect(self.on_run_selected)
         
@@ -39,9 +44,13 @@ class ExperimentViewer(QWidget):
         self.details_text.setReadOnly(True)
         self.details_text.setMaximumHeight(150)
         
+        layout.addWidget(title)
+        layout.addWidget(subtitle)
         layout.addLayout(search_layout)
         layout.addWidget(self.run_table)
-        layout.addWidget(QLabel("Run Details:"))
+        details_label = QLabel("Run Details")
+        details_label.setObjectName("SectionTitle")
+        layout.addWidget(details_label)
         layout.addWidget(self.details_text)
         
         self.setLayout(layout)

@@ -18,7 +18,7 @@ checkpoint_interval = 10
 auto_save = true
 
 [gui]
-theme = "dark"
+theme = "light"
 window_width = 1200
 window_height = 800
 auto_refresh = true

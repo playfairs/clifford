@@ -1,8 +1,12 @@
-from clifford.utils.utils import get_asset_path, get_db_path, serialize_ndarray, deserialize_ndarray, ensure_directory, create_batches, shuffle_data, split_data, he_uniform, he_normal, xavier_uniform, xavier_normal, one_hot_encode, one_hot_decode, normalize_data, denormalize_data, calculate_fan_in_fan_out
+from clifford.utils.utils import get_asset_path, get_db_path, get_legacy_db_paths, get_legacy_model_dirs, get_models_dir, get_project_root, serialize_ndarray, deserialize_ndarray, ensure_directory, create_batches, shuffle_data, split_data, he_uniform, he_normal, xavier_uniform, xavier_normal, one_hot_encode, one_hot_decode, normalize_data, denormalize_data, calculate_fan_in_fan_out
 
 __all__ = [
+    "get_project_root",
     "get_asset_path",
     "get_db_path",
+    "get_legacy_db_paths",
+    "get_models_dir",
+    "get_legacy_model_dirs",
     "serialize_ndarray",
     "deserialize_ndarray",
     "ensure_directory",

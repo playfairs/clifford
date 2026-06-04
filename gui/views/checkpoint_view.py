@@ -1,5 +1,4 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QTableWidget, QTableWidgetItem, QPushButton, QLabel, QLineEdit, QComboBox
-from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QHBoxLayout, QHeaderView, QLabel, QLineEdit, QPushButton, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget
 
 from clifford.database import Registry
 from clifford.search import Search
@@ -14,6 +13,13 @@ class CheckpointExplorer(QWidget):
 
     def init_ui(self):
         layout = QVBoxLayout()
+        layout.setContentsMargins(24, 24, 24, 24)
+        layout.setSpacing(16)
+
+        title = QLabel("Checkpoints")
+        title.setObjectName("PageTitle")
+        subtitle = QLabel("Inspect checkpoints captured during a training run.")
+        subtitle.setObjectName("MutedLabel")
         
         filter_layout = QHBoxLayout()
         self.run_id_input = QLineEdit()
@@ -28,9 +34,11 @@ class CheckpointExplorer(QWidget):
         self.checkpoint_table = QTableWidget()
         self.checkpoint_table.setColumnCount(5)
         self.checkpoint_table.setHorizontalHeaderLabels(["Checkpoint ID", "Epoch", "Loss", "Metrics", "Timestamp"])
-        self.checkpoint_table.horizontalHeader().setStretchLastSection(True)
+        self.checkpoint_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.checkpoint_table.setSelectionBehavior(QTableWidget.SelectRows)
         
+        layout.addWidget(title)
+        layout.addWidget(subtitle)
         layout.addLayout(filter_layout)
         layout.addWidget(self.checkpoint_table)
         

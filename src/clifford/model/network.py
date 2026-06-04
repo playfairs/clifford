@@ -143,7 +143,7 @@ class Network:
             if layer_info["type"] == "Input":
                 network.add(Input(input_dim=layer_info["input_dim"]))
             elif layer_info["type"] == "Dense":
-                from clifford.activations import ReLU, Sigmoid, Tanh, Softmax, LeakyReLU, Linear
+                from clifford.model.activations import ReLU, Sigmoid, Tanh, Softmax, LeakyReLU, Linear
                 
                 activation_map = {
                     "ReLU": ReLU(),

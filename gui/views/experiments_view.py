@@ -1,5 +1,6 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QTableWidget, QTableWidgetItem, QPushButton, QLabel, QLineEdit, QTextEdit, QComboBox, QTabWidget
-from PySide6.QtCore import Qt
+import sqlite3
+
+from PySide6.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QPushButton, QTabWidget, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget
 
 from clifford.database import Registry
 
@@ -12,12 +13,21 @@ class ExperimentsView(QWidget):
 
     def init_ui(self):
         layout = QVBoxLayout()
+        layout.setContentsMargins(24, 24, 24, 24)
+        layout.setSpacing(16)
+
+        title = QLabel("Experiments")
+        title.setObjectName("PageTitle")
+        subtitle = QLabel("Group runs and compare experiment outcomes.")
+        subtitle.setObjectName("MutedLabel")
         
         tabs = QTabWidget()
         
         tabs.addTab(self._create_experiments_tab(), "Experiments")
         tabs.addTab(self._create_runs_tab(), "Runs")
         
+        layout.addWidget(title)
+        layout.addWidget(subtitle)
         layout.addWidget(tabs)
         self.setLayout(layout)
 
@@ -100,7 +110,7 @@ class ExperimentsView(QWidget):
             self.experiments_table.setItem(i, 3, QTableWidgetItem(", ".join(exp["tags"])))
 
     def _refresh_runs(self):
-        with self.registry.db_path.connect() as conn:
+        with sqlite3.connect(self.registry.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT id, experiment_id, model_id, status, start_time FROM experiment_runs")
             rows = cursor.fetchall()

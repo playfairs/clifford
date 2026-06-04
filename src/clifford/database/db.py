@@ -5,7 +5,7 @@ from datetime import datetime
 import uuid
 import json
 
-from clifford.utils import get_db_path, ensure_directory
+from clifford.utils import get_db_path, get_legacy_db_paths
 from clifford.core.exceptions import DatabaseError
 from clifford.core.types import ModelMetadata, TrainingRun, Checkpoint, DatasetInfo, MetricRecord
 
@@ -14,6 +14,11 @@ class Registry:
     def __init__(self, db_path: Optional[Path] = None):
         if db_path is None:
             db_path = get_db_path()
+            if not db_path.exists():
+                for legacy_path in get_legacy_db_paths():
+                    if legacy_path.exists():
+                        db_path = legacy_path
+                        break
         self.db_path = Path(db_path)
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._initialize_database()
@@ -150,6 +155,13 @@ class Registry:
                     updated_at=row[5]
                 )
             return None
+
+    def get_model_id(self, name: str) -> Optional[str]:
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT id FROM models WHERE name = ?", (name,))
+            row = cursor.fetchone()
+            return row[0] if row else None
 
     def list_models(self) -> List[ModelMetadata]:
         with sqlite3.connect(self.db_path) as conn:
