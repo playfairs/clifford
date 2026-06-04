@@ -231,3 +231,4 @@ examples
 *.db
 consciousness*
 reasoning
+.pkl
