@@ -227,4 +227,5 @@ __marimo__/
 
 test*
 examples
-database
+# database
+*.db

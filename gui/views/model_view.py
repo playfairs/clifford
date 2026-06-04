@@ -1,15 +1,17 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QTableWidget, QTableWidgetItem, QPushButton, QLabel, QLineEdit, QTextEdit
 from PySide6.QtCore import Qt
 
-from clifford import ModelRegistry, SearchEngine, ModelPersistence
+from clifford.database import Registry
+from clifford.search import Search
+from clifford.store import Store
 
 
 class ModelBrowser(QWidget):
     def __init__(self):
         super().__init__()
-        self.registry = ModelRegistry()
-        self.search_engine = SearchEngine()
-        self.persistence = ModelPersistence()
+        self.registry = Registry()
+        self.search_engine = Search()
+        self.store = Store()
         self.init_ui()
 
     def init_ui(self):
@@ -40,7 +42,7 @@ class ModelBrowser(QWidget):
         self.details_text.setMaximumHeight(150)
         
         self.delete_button = QPushButton("Delete Model")
-        self.delete_button.clicked.connect(self.delete_model)
+        self.delete_button.clicked.connect(self.delete)
         self.delete_button.setEnabled(False)
         
         layout.addLayout(search_layout)
@@ -83,10 +85,10 @@ class ModelBrowser(QWidget):
             self.details_text.setText(details)
             self.delete_button.setEnabled(True)
 
-    def delete_model(self):
+    def delete(self):
         if hasattr(self, 'selected_model_name'):
             self.registry.delete_model(self.selected_model_name)
-            self.persistence.delete_model(self.selected_model_name)
+            self.store.delete(self.selected_model_name)
             self.refresh_models()
             self.details_text.clear()
             self.delete_button.setEnabled(False)

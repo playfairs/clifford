@@ -1,14 +1,15 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QTableWidget, QTableWidgetItem, QPushButton, QLabel, QLineEdit, QComboBox
 from PySide6.QtCore import Qt
 
-from clifford import ModelRegistry, SearchEngine
+from clifford.database import Registry
+from clifford.search import Search
 
 
 class DatasetBrowser(QWidget):
     def __init__(self):
         super().__init__()
-        self.registry = ModelRegistry()
-        self.search_engine = SearchEngine()
+        self.registry = Registry()
+        self.search_engine = Search()
         self.init_ui()
 
     def init_ui(self):

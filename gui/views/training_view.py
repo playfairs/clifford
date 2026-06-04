@@ -1,7 +1,11 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QSpinBox, QComboBox, QPushButton, QTextEdit, QProgressBar
 from PySide6.QtCore import Qt, QThread, Signal
 
-from clifford import Network, Dense, ReLU, Sigmoid, MeanSquaredError, SGD, Trainer, Dataset, ModelRegistry, ModelPersistence
+from clifford.model import Network, Dense, ReLU, Sigmoid, MeanSquaredError, SGD
+from clifford.train import Trainer
+from clifford.data import Dataset
+from clifford.database import Registry
+from clifford.store import Store
 
 
 class TrainingThread(QThread):
@@ -31,8 +35,8 @@ class TrainingThread(QThread):
 class TrainingDashboard(QWidget):
     def __init__(self):
         super().__init__()
-        self.registry = ModelRegistry()
-        self.persistence = ModelPersistence()
+        self.registry = Registry()
+        self.store = Store()
         self.init_ui()
 
     def init_ui(self):
@@ -178,7 +182,7 @@ class TrainingDashboard(QWidget):
         self.stop_button.setEnabled(False)
         
         model_name = self.model_name_input.text()
-        self.persistence.save_model(self.training_thread.network, model_name)
+        self.store.save(self.training_thread.network, model_name)
         self.registry.register_model(
             name=model_name,
             architecture=self.training_thread.network.get_architecture(),
